@@ -1,0 +1,181 @@
+U need replace ww.xxx.com to a new picture library !!!!!!!!!!!!!!!!
+If u not,u will unable to use lua successfully 
+Dont't use it for commercial activities such as sales !
+This lua belongs to ClotThorn#2447 and W3D Group
+This lua belongs to ClotThorn#2447 and W3D Group
+----------------------------watermark--------------------------------------------------
+local enable = ui.new_checkbox("lua", "b", "[W3D]WaterMark")
+local w,h = client.screen_size()
+local px = ui.new_slider("lua", "b","[W3D]Pos X", 0, w, w,true, nil, 1)
+local py = ui.new_slider("lua", "b","[W3D]Pos Y", 0, h, 0,true, nil, 1)
+
+local gpx = ui.new_slider("lua", "b","[W3D]GIF Pos X", 0, w, w - 250,true, nil, 1)
+local gpy = ui.new_slider("lua", "b","[W3D]GIF Pos Y", 0, h, 5,true, nil, 1)
+
+local gw = ui.new_slider("lua", "b","[W3D]GIF Width", 0, 200, 60,true, nil, 1)
+local gh = ui.new_slider("lua", "b","[W3D]GIF Height", 0, 200, 60,true, nil, 1)
+
+local gif_alpha = ui.new_slider("lua", "b","[W3D]Gif Alpha", 1, 255, 180,true, nil, 1)
+local png_clr = ui.new_combobox("lua", "b","[W3D]Png Color", "White","Black")
+
+local lable1 = ui.new_label("lua", "b", "[W3D]Color Left")
+local lclr = ui.new_color_picker("lua", "b","Color Left", 0,0,255,0)
+local lable2 = ui.new_label("lua", "b", "[W3D]Color Right")
+local rclr = ui.new_color_picker("lua", "b","Color Right", 0,0,255,255)
+
+local lclr_rgb = ui.new_checkbox("lua", "b", "[W3D]Left Color RGBs")
+local lclr_rgb_speed = ui.new_slider("lua", "b","[W3D]Left Color RGBs Frequency", 0, 10, 3,false)
+local rclr_rgb = ui.new_checkbox("lua", "b", "[W3D]Right Color RGBs")
+local rclr_rgb_speed = ui.new_slider("lua", "b","[W3D]Right Color RGBs Frequency", 0, 10, 3,false)
+
+local antiaim_ind = ui.new_checkbox("lua", "b", "[W3D]Anti-Aim Indicator")
+
+
+local lable5 = ui.new_label("lua", "b", "[W3D]Left Bar Color")
+local lbar_clr = ui.new_color_picker("lua", "b", "Left Bar Color", 0, 255, 0, 255)
+local lable6 = ui.new_label("lua", "b", "[W3D]BackGround Color")
+local bg_clr = ui.new_color_picker("lua", "b", "BackGround Color", 0, 0, 0, 255)
+local lable7 = ui.new_label("lua", "b", "[W3D]Gradient Color Left")
+local lgra_clr = ui.new_color_picker("lua", "b", "Gradient Color Left", 255, 255, 0, 255)
+local lable8 = ui.new_label("lua", "b", "[W3D]Gradient Color Right")
+local rgra_clr = ui.new_color_picker("lua", "b", "Gradient Color Right", 255, 255, 255, 255)
+
+
+local images = require "gamesense/images" or error("Missing gamesense/images")
+local http = require "gamesense/http" or error("Missing gamesense/http")
+local gif = require "gamesense/gif_decoder" or error("Missing gamesense/gif_decoder")
+
+local function round(num, numDecimalPlaces)
+    local mult = 10^(numDecimalPlaces or 0)
+    return math.floor(num * mult + 0.5) / mult
+end
+
+local dts = { ui.reference("rage", "other", "Double tap") }
+local png = nil
+local png_white = nil
+local w3d_gif = nil
+
+http.get("ww.xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx.com", function(s, r)
+    if s and r.status == 200 then
+        png = images.load(r.body)
+    end
+end)
+
+http.get("ww.xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx.com", function(s, r)
+    if s and r.status == 200 then
+        png_white = images.load(r.body)
+    end
+end)
+
+http.get("ww.xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx.com", function(s, r)
+    if s and r.status == 200 then
+        w3d_gif = gif.load_gif(r.body)
+    end
+end)
+
+local function UI_CALL()
+    local enabled = ui.get(enable)
+    ui.set_visible(px, enabled)
+    ui.set_visible(py,enabled)
+    ui.set_visible(lclr,enabled)
+    ui.set_visible(rclr,enabled)
+    ui.set_visible(lable1,enabled)
+    ui.set_visible(lable2,enabled)
+    ui.set_visible(png_clr,enabled)
+    ui.set_visible(gif_alpha,enabled)
+    ui.set_visible(gpx,enabled)
+    ui.set_visible(gpy,enabled)
+    ui.set_visible(gw,enabled)
+    ui.set_visible(gh,enabled)
+
+    ui.set_visible(rclr_rgb,enabled)
+    ui.set_visible(lclr_rgb,enabled)
+    ui.set_visible(rclr_rgb_speed,enabled and ui.get(rclr_rgb))
+    ui.set_visible(lclr_rgb_speed,enabled and ui.get(lclr_rgb))
+
+    local ind_enabled = ui.get(antiaim_ind)
+    ui.set_visible(lable5,ind_enabled)
+    ui.set_visible(lbar_clr,ind_enabled)
+    ui.set_visible(lable6,ind_enabled)
+    ui.set_visible(bg_clr,ind_enabled)
+    ui.set_visible(rgra_clr,ind_enabled)
+    ui.set_visible(lable7,ind_enabled)
+    ui.set_visible(lgra_clr,ind_enabled)
+    ui.set_visible(lable8,ind_enabled)
+end
+UI_CALL()
+ui.set_callback(enable, UI_CALL)
+ui.set_callback(antiaim_ind, UI_CALL)
+ui.set_callback(lclr_rgb, UI_CALL)
+ui.set_callback(rclr_rgb, UI_CALL)
+
+local function Draw()
+    local lplayer = entity.get_local_player()
+    if not lplayer then
+        return
+    end
+
+    local width = 200
+    local height = 50
+    local x,y = ui.get(px),ui.get(py)
+    local r1,g1,b1,a1 = ui.get(lclr)
+    local r2,g2,b2,a2 = ui.get(rclr)
+
+    if ui.get(enable) then
+        local draw_data = ui.get(png_clr) == "Black" and png or png_white
+        local gx,gy = ui.get(gpx),ui.get(gpy)
+        local gwidth,gheight = ui.get(gw),ui.get(gh)
+        local galpha = ui.get(gif_alpha)
+
+        if ui.get(lclr_rgb) then
+            local rgbs_speed = ui.get(lclr_rgb_speed)
+            r1,g1,b1 = math.floor(math.sin(globals.realtime() * rgbs_speed) * 127 + 128),
+            math.floor(math.sin(globals.realtime() * rgbs_speed + 2) * 127 + 128),
+            math.floor(math.sin(globals.realtime() * rgbs_speed + 4) * 127 + 128)
+        end
+    
+        if ui.get(rclr_rgb) then
+            local rgbs_speed = ui.get(rclr_rgb_speed)
+            r2,g2,b2 = math.floor(math.sin(globals.realtime() * rgbs_speed) * 127 + 128),
+            math.floor(math.sin(globals.realtime() * rgbs_speed + 2) * 127 + 128),
+            math.floor(math.sin(globals.realtime() * rgbs_speed + 4) * 127 + 128)
+        end
+        
+        renderer.gradient(x - width, y, width, height, r1, g1, b1, a1, r2, g2, b2, a2, true)
+
+        if draw_data then
+            draw_data:draw(x - width,y,width,height)
+        end
+    
+        if w3d_gif then
+            w3d_gif:draw(globals.realtime(),gx,gy,gwidth,gheight,255,255,255,galpha)
+        end
+    end
+
+    if ui.get(antiaim_ind) then
+
+        local body_yaw = entity.is_alive(lplayer) and math.max(-60, math.min(60, round((entity.get_prop(lplayer, "m_flPoseParameter", 11) or 0) * 120 - 60, 1))) or 0
+        x,y = x - width + 20,y + height + 5
+        width,height = 180,20
+
+        r1,g1,b1,a1 = ui.get(bg_clr)
+        r2,g2,b2,a2 = ui.get(lbar_clr)
+
+        renderer.rectangle(x, y, width, height, r1, g1, b1, a1)
+        renderer.rectangle(x, y, 5, height, r2, g2, b2, a2)
+        x,y = x + 8,y + height / 2 - 6
+        renderer.text(x, y,255,255,255,255, 12, nil,"Fake[" .. (body_yaw > 0 and " > " or " < ") .. "]" .. " Dsy: ")
+
+        width,height = 35,8
+        r1,g1,b1,a1 = ui.get(lgra_clr)
+        r2,g2,b2,a2 = ui.get(rgra_clr)
+        
+        local width_draw = (width / 58) * math.abs(body_yaw)
+        renderer.gradient(x + 68, y + height / 2, width_draw, height, r1, g1, b1, a1, r2, g2, b2, a2, true)
+
+        renderer.text(x + 110, y,255,255,255,255, 12, nil,"lag: " .. (ui.get(dts[2]) and "broken" or "unsafe"))
+
+    end
+
+end
+client.set_event_callback("paint", Draw)
